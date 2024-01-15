@@ -9,12 +9,10 @@
 
 2. **Create Environment Variables:**
 Create two files in the project root: .env.test and .env.development.
-Add the following line to each file, replacing 'your-dev-database' and 'your-test-database' with the actual database names:
+Add the following line to each file
 
-PGDATABASE='your-dev-database'
-PGDATABASE='your-test-database'
+PGDATABASE=nc_news
+PGDATABASE=nc_news_test
 
-
-Ensure that these .env files are included in your .gitignore to keep sensitive information secure.
 
 Now run command 'npm install'
