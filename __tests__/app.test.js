@@ -43,7 +43,7 @@ describe("GET /api/topics", () => {
           topic.forEach((topic) => {
             expect(topic).toHaveProperty("slug");
             expect(topic).toHaveProperty("description");
-            
+           
           });
         });
     });
@@ -165,6 +165,93 @@ describe("GET /api/articles/:article_id", () => {
 
 
 
+describe("GET /api/articles", () => {
+  test("Get:200 return  all articles ", () => {
+    return request(app).get("/api/articles")
+      .expect(200);
+  });
 
+  test("responds with article data in array", () => {
+    return request(app)
+      .get("/api/articles")
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeInstanceOf(Array);
+      });
+  });
+
+  test(" return a length of article array", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.length).toBe(13);
+      });
+  });
+
+ test("should return all the articles with correct properties", () => {
+   return request(app)
+     .get("/api/articles")
+     .expect(200)
+     .then(({ body }) => {
+       const { article } = body;
+       article.forEach((article) => {
+         expect(article).toHaveProperty("author");
+         expect(article).toHaveProperty("title");
+         expect(article).toHaveProperty("article_id");
+         expect(article).toHaveProperty("topic");
+         expect(article).toHaveProperty("created_at");
+         expect(article).toHaveProperty("votes");
+         expect(article).toHaveProperty("article_img_url");
+         expect(article).toHaveProperty("comment_count");
+         expect(article).not.toHaveProperty("body");
+       });
+     });
+ });
+
+
+  test("should return all the articles with correct types", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        console.log(body);
+        article.forEach((article) => {
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.body).not.toBe("string");
+          expect(typeof article.comment_count).toBe("string");
+        });
+      });
+  });
+
+  describe("Articles error handler", () => {
+    test("GET:404 return appropriate message if there is no database", () => {
+      return request(app)
+        .get("/api/articles")
+        .then(({ body }) => {
+          if (body.length === 0) {
+            expect(404);
+            expect(body.msg).toBe("article does not exist");
+          }
+        });
+    });
+    test("GET:400 return appropriate message if there is invalid path", () => {
+      return request(app)
+        .get("/api/not-a-article")
+        .then(({ body }) => {
+          expect(400);
+          expect(body.msg).toBe("This path does not exist");
+        });
+    });
+  });
+});
 
 
