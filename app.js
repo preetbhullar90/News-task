@@ -8,11 +8,15 @@ const {
   availableEndpoints,
 } = require("./controllers/endpoints.controller");
 
+const { getArticleById } = require("./controllers/articles.controller");
+
 app.use(express.json());
 
 app.get("/api/topics", getAllTopics);
 
 app.get("/api", availableEndpoints);
+
+app.get("/api/articles/:article_id", getArticleById);
 
 
 
@@ -21,8 +25,15 @@ app.use((req, res, next) => {
   
 });
 
+app.use((err, req, res, next) => {
+  if (err.status && err.msg) {
+    return res.send(err);
+  }
+  return res.status(404).send({ msg: "Not found." });
+});
 
-app.use('*', (req, res, next) => {
+
+app.use('*', (err,req, res, next) => {
   res.status(500).send({msg:'Internal server error'})
 })
 

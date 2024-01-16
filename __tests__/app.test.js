@@ -49,7 +49,26 @@ describe("GET /api/topics", () => {
     });
   
   
-
+describe("Topic error handler", () => {
+  test("GET:404 return appropriate message if there is no database", () => {
+    return request(app)
+      .get("/api/topics")
+      .then(({ body }) => {
+        if (body.length === 0) {
+          expect(404);
+          expect(body.msg).toBe("topics do not exist");
+        }
+      });
+  });
+  test("GET:400 return appropriate message if there is invalid path", () => {
+    return request(app)
+      .get("/api/not-a-topics")
+      .then(({ body }) => {
+        expect(400);
+        expect(body.msg).toBe("This path does not exist");
+      });
+  });
+});
 
 });
 
@@ -80,24 +99,72 @@ describe("Endpoints", () => {
   })
 })
 
-describe('Error handler', () => { 
-    
-    test("GET:404 return appropriate message if there is no database", () => {
-      return request(app)
-        .get("/api/topics")
-        .then(({ body }) => {
-          if (body.length === 0) {
-            expect(404);
-            expect(body.msg).toBe("topics do not exist");
-          }
+
+
+describe("GET /api/articles/:article_id", () => {
+  test("should return a specific article by id with correct types", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(typeof article.article_id).toBe("number");
+        expect(typeof article.title).toBe("string");
+        expect(typeof article.topic).toBe("string");
+        expect(typeof article.author).toBe("string");
+        expect(typeof article.body).toBe("string");
+        expect(typeof article.created_at).toBe("string");
+        expect(typeof article.votes).toBe("number");
+        expect(typeof article.article_img_url).toBe("string");
+      });
+  });
+  test("should return a specific article by id", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toEqual({
+          article: {
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: "2020-07-09T20:11:00.000Z",
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          },
         });
-    });
-    test("GET:400 return appropriate message if there is invalid path", () => {
-      return request(app)
-        .get("/api/not-a-topics")
-        .then(({ body }) => {
-          expect(400);
-          expect(body.msg).toBe("This path does not exist");
-        });
-    });
- })
+      });
+  });
+
+  describe('Article error handler', () => {
+
+      test("GET:404 return appropriate message if there is no id", () => {
+        return request(app)
+          .get("/api/articles/999")
+          .then(({ body }) => {
+            
+              expect(404);
+              expect(body.msg).toBe("This article id does not exist");
+            
+          });
+      });
+      test("GET:400 return appropriate message if there is invalid article id", () => {
+        return request(app)
+          .get("/api/articles/apple")
+          .then(({ body }) => {
+            expect(400);
+            expect(body.msg).toBe("Invalid article id");
+          });
+      });
+   })
+});
+
+
+
+
+
+
+
