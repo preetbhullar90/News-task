@@ -9,8 +9,8 @@
 
 2. **Create Environment Variables:**
 Create two files in the project root: .env.test and .env.development.
-Add the following line to each file
 
+Add the following line to each file:
 PGDATABASE=nc_news
 PGDATABASE=nc_news_test
 
