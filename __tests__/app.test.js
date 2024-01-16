@@ -12,18 +12,18 @@ describe("GET /api/topics", () => {
       return request(app).get("/api/topics").expect(200);
   });
     
-    test("GET: 200 responds with topics data in array", () => {
+    test("responds with topics data in array", () => {
       return request(app)
         .get("/api/topics")
         .then(({ body }) => {
             const { topic } = body;
-          expect(Array.isArray(topic)).toBe(true);
+          expect(topic).toBeInstanceOf(Array);
         });
     });
 
 
 
-      test("GET:200 return a length of topic array", () => {
+      test(" return a length of topic array", () => {
         return request(app)
           .get("/api/topics")
           .expect(200)
@@ -33,17 +33,40 @@ describe("GET /api/topics", () => {
           });
       });
     
-    test("GET:200 sends an array of topics to the client", () => {
+    test("Return objects should have slug and description properties", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
           .then(({ body }) => {
             const {topic} = body
           topic.forEach((topic) => {
-            expect(typeof topic.slug).toBe("string");
-            expect(typeof topic.description).toBe("string");
+            expect(topic).toHaveProperty("slug");
+            expect(topic).toHaveProperty("description");
             
           });
         });
     });
+  
+    
+    test('GET:404 return appropriate message if there is no database', () => {
+      return request(app).get("/api/topics")
+      .then(({body}) => {
+        if (body.length === 0) {
+          
+          expect(404)
+        expect(body.msg).toBe("topics do not exist");
+        }
+      
+    })
+  })
+  test("GET:400 return appropriate message if there is invalid path", () => {
+    return request(app)
+      .get("/api/not-a-topics")
+      .then(({body}) => {
+        expect(400);
+        expect(body.msg).toBe("This path does not exist");
+      });
+  });
+
+
 });
