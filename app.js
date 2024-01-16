@@ -4,9 +4,15 @@ const {
   getAllTopics,
 } = require("./controllers/news.controllers");
 
+const {
+  availableEndpoints,
+} = require("./controllers/endpoints.controller");
+
 app.use(express.json());
 
 app.get("/api/topics", getAllTopics);
+
+app.get("/api", availableEndpoints);
 
 
 

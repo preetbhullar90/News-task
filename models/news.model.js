@@ -1,5 +1,6 @@
 const db = require("../db/connection");
 
+
 module.exports.fetchAllTopics = () => {
   return db
     .query(
@@ -14,3 +15,8 @@ module.exports.fetchAllTopics = () => {
       return rows;
     });
 };
+
+
+
+
+
