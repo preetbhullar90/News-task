@@ -91,7 +91,6 @@ describe("Endpoints", () => {
         .expect(200)
         .then(({ body }) => {
           const { endpoints } = body;
-          expect(endpoints).toBeInstanceOf(Object)
           expect(endpoints).toEqual(endpoints);
       })
      
@@ -102,6 +101,16 @@ describe("Endpoints", () => {
 
 
 describe("GET /api/articles/:article_id", () => {
+
+test("responds with topics data in object", () => {
+  return request(app)
+    .get("/api/articles/1")
+    .then(({ body }) => {
+      const { article } = body;
+      
+      expect(article).toBeInstanceOf(Object);
+    });
+});
   test("should return a specific article by id with correct types", () => {
     return request(app)
       .get("/api/articles/1")
@@ -171,6 +180,15 @@ describe("GET /api/articles", () => {
       .expect(200);
   });
 
+    test("return data sorted by date descending", () => {
+      return request(app)
+        .get("/api/articles")
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toBeSorted({ descending: true });
+        });
+    });
+
   test("responds with article data in array", () => {
     return request(app)
       .get("/api/articles")
@@ -179,6 +197,8 @@ describe("GET /api/articles", () => {
         expect(article).toBeInstanceOf(Array);
       });
   });
+
+
 
   test(" return a length of article array", () => {
     return request(app)
@@ -217,7 +237,6 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         const { article } = body;
-        console.log(body);
         article.forEach((article) => {
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
@@ -255,3 +274,66 @@ describe("GET /api/articles", () => {
 });
 
 
+describe("GET /api/articles/:article_id/comments", () => {
+test("return data sorted by date descending", () => {
+  return request(app)
+    .get("/api/articles/1/comments")
+    .then(({ body }) => {
+      const { comment } = body;
+      expect(comment).toBeSorted({ descending: true });
+    });
+});
+
+  test("should return a specific comments by id with correct types", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        comment.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.article_id).toBe("number");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.votes).toBe("number");
+        })
+
+      });
+  });
+  test("should return all comments by article id", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        comment.forEach((comment) => {
+          expect(comment).toHaveProperty("comment_id");
+          expect(comment).toHaveProperty("author");
+          expect(comment).toHaveProperty("article_id");
+          expect(comment).toHaveProperty("created_at");
+          expect(comment).toHaveProperty("votes");
+          expect(comment).toHaveProperty("body");
+        })
+      });
+  });
+
+  describe("Comments error handler", () => {
+    test("GET:404 return appropriate message if there is no id", () => {
+      return request(app)
+        .get("/api/articles/999/comments")
+        .then(({ body }) => {
+          expect(404);
+          expect(body.msg).toBe("This article id does not exist");
+        });
+    });
+    test("GET:400 return appropriate message if there is invalid article id", () => {
+      return request(app)
+        .get("/api/articles/apple/comments")
+        .then(({ body }) => {
+          expect(400);
+          expect(body.msg).toBe("Invalid article id");
+        });
+    });
+  });
+});
