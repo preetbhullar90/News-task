@@ -3,7 +3,7 @@ const app = express();
 const {getAllTopics} = require("./controllers/news.controllers");
 const {availableEndpoints} = require("./controllers/endpoints.controller");
 const { getArticleById, getAllArticles } = require("./controllers/articles.controller");
-const { getAllComments } = require("./controllers/comments.controller");
+const { getAllComments,addComment } = require("./controllers/comments.controller");
 
 
 app.use(express.json());
@@ -12,6 +12,7 @@ app.get("/api", availableEndpoints);
 app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles", getAllArticles);
 app.get("/api/articles/:article_id/comments", getAllComments);
+app.post("/api/articles/:article_id/comments", addComment);
 
 
 app.use((req, res, next) => {
@@ -24,6 +25,7 @@ app.use((err, req, res, next) => {
   return res.status(404).send({ msg: "Not found." });
 });
 app.use('*', (err, req, res, next) => {
+  console.log(err)
   res.status(500).send({ msg: 'Internal server error' })
 });
 
