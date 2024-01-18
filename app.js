@@ -7,7 +7,11 @@ const {
   getAllArticles,
   patchArticleById,
 } = require("./controllers/articles.controller");
-const { getAllComments,addComment } = require("./controllers/comments.controller");
+const {
+  getAllComments,
+  addComment,
+  deleteComment,
+} = require("./controllers/comments.controller");
 
 
 app.use(express.json());
@@ -18,6 +22,7 @@ app.get("/api/articles", getAllArticles);
 app.get("/api/articles/:article_id/comments", getAllComments);
 app.post("/api/articles/:article_id/comments", addComment);
 app.patch("/api/articles/:article_id/", patchArticleById);
+app.delete("/api/comments/:comment_id", deleteComment);
 
 
 app.use((req, res, next) => {
@@ -25,7 +30,7 @@ app.use((req, res, next) => {
 });
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
-    return res.send(err);
+    return res.status(err.status).send(err);
   }
   return res.status(404).send({ msg: "Not found." });
 });
