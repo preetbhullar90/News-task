@@ -132,8 +132,10 @@ test("responds with topics data in object", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        expect(body).toEqual({
-          article: {
+        const { article } = body;
+        
+        expect(article).toEqual({
+          
             article_id: 1,
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -143,7 +145,7 @@ test("responds with topics data in object", () => {
             votes: 100,
             article_img_url:
               "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          },
+          
         });
       });
   });
@@ -336,4 +338,62 @@ test("return data sorted by date descending", () => {
         });
     });
   });
+});
+
+
+
+
+describe("POST /api/articles/1/comments", () => {
+
+
+test("POST: 201, post with status code 201", () => {
+  return request(app)
+    .post("/api/articles/5/comments")
+    .send({ username: "butter_bridge", body: "body body" })
+    .expect(201)
+});
+
+test("POST: 201, should return  new posted comment for the given article_id", () => {
+  return request(app)
+    .post("/api/articles/5/comments")
+    .send({ username: "butter_bridge", body: "Body Body" })
+    .expect(201)
+    .then(({ body }) => {
+      const { comment } = body;
+      
+      expect(comment).toEqual({
+        comment_id: 19,
+        body: "Body Body",
+        article_id: 5,
+        author: "butter_bridge",
+        votes: 0,
+        created_at: expect.any(String),
+      });
+    });
+});
+    describe("Comments POST error handler", () => {
+      test("GET:404 return appropriate message if there is no id", () => {
+        return request(app)
+          .post("/api/articles/999/comments")
+          .then(({ body }) => {
+            expect(404);
+            expect(body.msg).toBe("username not found");
+          });
+      });
+      test("GET:400 return appropriate message if there is invalid article id", () => {
+        return request(app)
+          .post("/api/articles/apple/comments")
+          .then(({ body }) => {
+            expect(body.msg).toBe("Invalid article id");
+          });
+      });
+    });
+test("POST: 404, should respond with appropriate message when requesting to post a comment from a username not in users database", () => {
+  return request(app)
+    .post("/api/articles/5/comments")
+    .send({ username: "ppp", body: "Body Body" })
+    .then(({ body }) => {
+      expect(body.msg).toBe("username not found");
+    });
+});
 });
