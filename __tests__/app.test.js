@@ -55,7 +55,7 @@ describe("Topic error handler", () => {
       .get("/api/topics")
       .then(({ body }) => {
         if (body.length === 0) {
-          expect(404);
+          expect(body.status).toBe(404);
           expect(body.msg).toBe("topics do not exist");
         }
       });
@@ -64,7 +64,6 @@ describe("Topic error handler", () => {
     return request(app)
       .get("/api/not-a-topics")
       .then(({ body }) => {
-        expect(400);
         expect(body.msg).toBe("This path does not exist");
       });
   });
@@ -157,7 +156,7 @@ test("responds with topics data in object", () => {
           .get("/api/articles/999")
           .then(({ body }) => {
             
-              expect(404);
+              expect(body.status).toBe(404);
               expect(body.msg).toBe("This article id does not exist");
             
           });
@@ -166,7 +165,7 @@ test("responds with topics data in object", () => {
         return request(app)
           .get("/api/articles/apple")
           .then(({ body }) => {
-            expect(400);
+            expect(body.status).toBe(400);
             expect(body.msg).toBe("Invalid article id");
           });
       });
@@ -259,7 +258,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles")
         .then(({ body }) => {
           if (body.length === 0) {
-            expect(404);
+            expect(body.status).toBe(404);
             expect(body.msg).toBe("article does not exist");
           }
         });
@@ -268,7 +267,6 @@ describe("GET /api/articles", () => {
       return request(app)
         .get("/api/not-a-article")
         .then(({ body }) => {
-          expect(400);
           expect(body.msg).toBe("This path does not exist");
         });
     });
@@ -325,7 +323,7 @@ test("return data sorted by date descending", () => {
       return request(app)
         .get("/api/articles/999/comments")
         .then(({ body }) => {
-          expect(404);
+          expect(body.status).toBe(404);
           expect(body.msg).toBe("This article id does not exist");
         });
     });
@@ -333,7 +331,7 @@ test("return data sorted by date descending", () => {
       return request(app)
         .get("/api/articles/apple/comments")
         .then(({ body }) => {
-          expect(400);
+          expect(body.status).toBe(400);
           expect(body.msg).toBe("Invalid article id");
         });
     });
@@ -376,7 +374,7 @@ test("POST: 201, should return  new posted comment for the given article_id", ()
         return request(app)
           .post("/api/articles/999/comments")
           .then(({ body }) => {
-            expect(404);
+            expect(body.status).toBe(404);
             expect(body.msg).toBe("username not found");
           });
       });
@@ -384,6 +382,7 @@ test("POST: 201, should return  new posted comment for the given article_id", ()
         return request(app)
           .post("/api/articles/apple/comments")
           .then(({ body }) => {
+            expect(body.status).toBe(400);
             expect(body.msg).toBe("Invalid article id");
           });
       });
@@ -393,6 +392,7 @@ test("POST: 404, should respond with appropriate message when requesting to post
     .post("/api/articles/5/comments")
     .send({ username: "ppp", body: "Body Body" })
     .then(({ body }) => {
+      expect(body.status).toBe(404);
       expect(body.msg).toBe("username not found");
     });
 });
@@ -428,14 +428,13 @@ describe('PATCH request', () => {
 
   
     
-    describe("Comments POST error handler", () => {
+    describe("PATCH POST error handler", () => {
       test("GET:400 should return a 400 status if the inc_votes not a number", () => {
         return request(app)
           .patch("/api/articles/1")
           .send({ inc_votes: 'no inc' })
           .then(({ body }) => {
-            expect(400)
-            const { article } = body;
+           expect(body.status).toBe(400);
             expect(body.msg).toBe("Inc_vote should be a number");
           });
       });
@@ -448,5 +447,42 @@ describe('PATCH request', () => {
             });
         });
     });
+  });
+})
+
+
+//DELETE Comments
+describe('DELETE request', () => {
+  describe("DELETE /api/comments/:comment_id", () => {
+    test("should delete a comment by comment_id",() => {
+      return request(app)
+        .delete('/api/comments/1')
+        .then((result) => {
+          expect(result.status).toBe(204);
+       expect(result.body).toEqual({}); 
+      })
+    });
+  
+  
+      describe("Comments DELETE error handler", () => {
+        test("GET:400 should return a 400 status if the id not a number", () => {
+          return request(app)
+            .delete("/api/comments/apple")
+            .then(({ body }) => {
+              expect(body.status).toBe(400);
+              expect(body.msg).toEqual("Invalid comment id");
+            });
+        });
+ test("GET:404 return appropriate message if there is no id", () => {
+   return request(app)
+     .delete("/api/comments/999")
+     .then((result) => {
+     expect(result.status).toBe(404)
+       expect(result.body.msg).toEqual("This comment id does not exist");
+     });
+ });
+        
+      });
+    
   });
 })
