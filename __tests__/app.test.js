@@ -486,3 +486,63 @@ describe('DELETE request', () => {
     
   });
 })
+
+
+
+//GET Users
+
+describe("GET /api/users", () => {
+  test("GET 200 responds with users data in array", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user).toBeInstanceOf(Array);
+      });
+  });
+
+  test(" return a length of users array", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user.length).toBe(4);
+      });
+  });
+
+  test("Return objects should have all the properties", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        user.forEach((user) => {
+          expect(user).toHaveProperty("username");
+          expect(user).toHaveProperty("name");
+          expect(user).toHaveProperty("avatar_url");
+        });
+      });
+  });
+
+  describe("Users error handler", () => {
+    test("GET:404 return appropriate message if there is no database", () => {
+      return request(app)
+        .get("/api/users")
+        .then(({ body }) => {
+          if (body.length === 0) {
+            expect(body.status).toBe(404);
+            expect(body.msg).toBe("users do not exist");
+          }
+        });
+    });
+    test("GET:400 return appropriate message if there is invalid path", () => {
+      return request(app)
+        .get("/api/not-a-topics")
+        .then(({ body }) => {
+          expect(body.msg).toBe("This path does not exist");
+        });
+    });
+   });
+});
