@@ -397,3 +397,56 @@ test("POST: 404, should respond with appropriate message when requesting to post
     });
 });
 });
+
+
+//UPDATE Article Test
+
+describe('PATCH request', () => { 
+  describe("PATCH /api/articles/1", () => {
+    test("UPDATE: 200, update with status code 200", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 100 })
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article.votes).toBe(200)
+          expect(article).toBeInstanceOf(Object);
+          
+        });
+    })
+         test("should update an article by article_id with a negative inc_votes value", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ inc_votes: -30 })
+            .expect(200)
+            .then(({ body }) => {
+              const { article } = body;
+              expect(article.votes).toBe(70) 
+        });
+         });
+
+  
+    
+    describe("Comments POST error handler", () => {
+      test("GET:400 should return a 400 status if the inc_votes not a number", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 'no inc' })
+          .then(({ body }) => {
+            expect(400)
+            const { article } = body;
+            expect(body.msg).toBe("Inc_vote should be a number");
+          });
+      });
+
+        test("GET:400 return appropriate message if there is invalid article id", () => {
+          return request(app)
+            .patch("/api/articles/apple")
+            .then(({ body }) => {
+              expect(body.msg).toBe("Invalid article id");
+            });
+        });
+    });
+  });
+})
