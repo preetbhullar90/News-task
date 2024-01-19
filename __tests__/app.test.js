@@ -108,8 +108,19 @@ test("responds with topics data in object", () => {
       const { article } = body;
       
       expect(article).toBeInstanceOf(Object);
-    });
+    }); 
 });
+  
+  test("should get article by ID with comment count", () => {
+    return request(app)
+      .get(`/api/articles?sort_by=article_id`)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeSortedBy("article_id", { descending: true });
+      });
+  });
+  
   test("should return a specific article by id with correct types", () => {
     return request(app)
       .get("/api/articles/1")
