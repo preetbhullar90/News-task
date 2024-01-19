@@ -100,17 +100,16 @@ describe("Endpoints", () => {
 
 
 describe("GET /api/articles/:article_id", () => {
+  test("responds with topics data in object", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .then(({ body }) => {
+        const { article } = body;
 
-test("responds with topics data in object", () => {
-  return request(app)
-    .get("/api/articles/1")
-    .then(({ body }) => {
-      const { article } = body;
-      
-      expect(article).toBeInstanceOf(Object);
-    }); 
-});
-  
+        expect(article).toBeInstanceOf(Object);
+      });
+  });
+
   test("should get article by ID with comment count", () => {
     return request(app)
       .get(`/api/articles?sort_by=article_id`)
@@ -120,7 +119,36 @@ test("responds with topics data in object", () => {
         expect(article).toBeSortedBy("article_id", { descending: true });
       });
   });
-  
+
+  test("should get all articles with default sorting", () => {
+    return request(app)
+      .get(`/api/articles/`)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+      });
+  });
+
+  test("should get all articles sorted by title in ascending order", () => {
+    return request(app)
+      .get(`/api/articles?sort_by=title&order=asc`)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeSortedBy("title", { ascending: true });
+      });
+  });
+
+    test("should get all articles sorted by title in descending order", () => {
+      return request(app)
+        .get(`/api/articles?sort_by=title&order=desc`)
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toBeSortedBy("title", { descending: true });
+        });
+    });
+
   test("should return a specific article by id with correct types", () => {
     return request(app)
       .get("/api/articles/1")
@@ -143,44 +171,39 @@ test("responds with topics data in object", () => {
       .expect(200)
       .then(({ body }) => {
         const { article } = body;
-        
+
         expect(article).toEqual({
-          
-            article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
-            created_at: "2020-07-09T20:11:00.000Z",
-            votes: 100,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: "2020-07-09T20:11:00.000Z",
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
         });
       });
   });
 
-  describe('Article error handler', () => {
-
-      test("GET:404 return appropriate message if there is no id", () => {
-        return request(app)
-          .get("/api/articles/999")
-          .then(({ body }) => {
-            
-              expect(body.status).toBe(404);
-              expect(body.msg).toBe("This article id does not exist");
-            
-          });
-      });
-      test("GET:400 return appropriate message if there is invalid article id", () => {
-        return request(app)
-          .get("/api/articles/apple")
-          .then(({ body }) => {
-            expect(body.status).toBe(400);
-            expect(body.msg).toBe("Invalid article id");
-          });
-      });
-   })
+  describe("Article error handler", () => {
+    test("GET:404 return appropriate message if there is no id", () => {
+      return request(app)
+        .get("/api/articles/999")
+        .then(({ body }) => {
+          expect(body.status).toBe(404);
+          expect(body.msg).toBe("This article id does not exist");
+        });
+    });
+    test("GET:400 return appropriate message if there is invalid article id", () => {
+      return request(app)
+        .get("/api/articles/apple")
+        .then(({ body }) => {
+          expect(body.status).toBe(400);
+          expect(body.msg).toBe("Invalid article id");
+        });
+    });
+  });
 });
 
 
