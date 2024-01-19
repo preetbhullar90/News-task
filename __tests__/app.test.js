@@ -247,7 +247,7 @@ describe("GET /api/articles", () => {
           expect(typeof article.votes).toBe("number");
           expect(typeof article.article_img_url).toBe("string");
           expect(typeof article.body).not.toBe("string");
-          expect(typeof article.comment_count).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
         });
       });
   });
@@ -542,6 +542,85 @@ describe("GET /api/users", () => {
         .get("/api/not-a-topics")
         .then(({ body }) => {
           expect(body.msg).toBe("This path does not exist");
+        });
+    });
+   });
+});
+
+
+
+//GET Article By Topic
+
+describe("GET /api/articles/topic", () => {
+  test("GET 200 should get all articles", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.length).toBe(13);
+      });
+  });
+
+  test(" return a length of topic array", () => {
+    return request(app)
+      .get(`/api/articles?topic=mitch`)
+      .expect(200)
+      .then(({body}) => {
+        const { article } = body;
+       expect(article.length).toBe(12);
+      });
+  });
+
+  test("Return should filter articles by the topic value", () => {
+    return request(app)
+      .get(`/api/articles?topic=mitch`)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        article.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+          
+        });
+      });
+  });
+
+test("GET: 200, responds with an empty array if topic query in request has no articles associated to it", () => {
+  return request(app)
+    .get("/api/articles?topic=paper")
+    .expect(200)
+    .then(({ body }) => {
+      const { article } = body;
+      expect(article).toEqual([]);
+    });
+});
+  
+  test("GET: 200, client can sort articles by given sort_by query, only valid columns are accepted for sorting", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeSortedBy("article_id", { descending: true });
+      });
+  });
+
+  describe("Users error handler", () => {
+    test("GET:404 return appropriate message if there is no database", () => {
+      return request(app)
+        .get("/api/users")
+        .then(({ body }) => {
+          if (body.length === 0) {
+            expect(body.status).toBe(404);
+            expect(body.msg).toBe("users do not exist");
+          }
+        });
+    });
+    test("GET:400 return appropriate message if there is invalid path", () => {
+      return request(app)
+        .get("/api/articles?sort_by=not-a-topics")
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
         });
     });
    });

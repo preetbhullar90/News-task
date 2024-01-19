@@ -1,4 +1,6 @@
 const db = require("../db/connection");
+
+
 module.exports.fetchArticleById = (article_id) => {
 
     if (!Number(article_id)) {
@@ -22,37 +24,42 @@ module.exports.fetchArticleById = (article_id) => {
 };
 
 
-module.exports.fetchAllArticles = () => {
-  return db
-    .query(`SELECT articles.author,
-          articles.title,
-          articles.article_id,
-          articles.topic,
-          articles.created_at,
-          articles.votes,
-          articles.article_img_url,
-          COUNT(comments.comment_id) AS comment_count
-        FROM
-          articles
-        LEFT JOIN
-          comments ON articles.article_id = comments.article_id
-        GROUP BY
-          articles.article_id
-        ORDER BY
-          articles.created_at DESC;`)
-      
-    .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: `This article does not exist`,
-        });
-      }
+exports.fetchAllArticles = (topic, sort_by = "created_at", order = "desc") => {
+  const queryValues = [];
+  const validSortByQueries = [
+    "created_at",
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "votes",
+    "article_img_url",
+  ];
+  const validOrderQueries = ["asc", "desc"];
 
-      return rows;
-    });
+  if (
+    !validSortByQueries.includes(sort_by) ||
+    !validOrderQueries.includes(order)
+  ) {
+    return Promise.reject({ status: 400, msg: "Bad Request" });
+  }
+
+  let sqlQuery = `
+    SELECT author, title, article_id, topic, created_at, votes, article_img_url, CAST((SELECT COUNT(*) FROM comments WHERE comments.article_id = articles.article_id) AS INTEGER) AS comment_count FROM articles 
+    `;
+  if (topic !== undefined) {
+    sqlQuery += ` WHERE topic = $1 `;
+    queryValues.push(topic);
+  }
+
+  sqlQuery += ` ORDER BY ${sort_by} ${order} `;
+
+  return db.query(sqlQuery, queryValues).then((response) => {
+    const { rows } = response;
+    return rows;
+  });
 };
-
 
 
 module.exports.fetchPatchArticle= (article_id,inc_votes) => {
@@ -75,3 +82,7 @@ module.exports.fetchPatchArticle= (article_id,inc_votes) => {
       return rows[0];
     });
 };
+
+
+
+
