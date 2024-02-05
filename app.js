@@ -1,5 +1,7 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
+app.use(cors());
 const {getAllTopics} = require("./controllers/news.controllers");
 const {availableEndpoints} = require("./controllers/endpoints.controller");
 const {
